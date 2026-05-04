@@ -24,6 +24,9 @@
   --focus-ring-offset: 3px;
   --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
 
+  /* Pannello hero Camere (mockup) */
+  --camere-hero-panel: #f2efe9;
+
   /* Hero sottotitolo: località vs regione */
   --hero-sub-place: rgba(252, 250, 245, 0.94);
   --hero-sub-region: #dcc5a5;
