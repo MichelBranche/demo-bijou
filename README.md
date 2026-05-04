@@ -1,5 +1,7 @@
 # Hotel Bijou · Saint-Vincent
 
+![Hero Section](preview.png)
+
 Front-end demo per l’**Hotel Bijou** di **Saint-Vincent** (Valle d’Aosta): home, struttura, camere, territorio e contatti, con intro loader, navigazione e animazioni curate.
 
 ## Tech stack
