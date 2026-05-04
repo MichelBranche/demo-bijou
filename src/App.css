@@ -1667,13 +1667,26 @@ h3,
 .hotel-photo-lightbox__img {
   display: block;
   max-width: min(1200px, 94vw);
-  max-height: min(78vh, 900px);
+  max-height: min(78vh, 78dvh, 900px);
   width: auto;
   height: auto;
   margin-inline: auto;
   object-fit: contain;
   border-radius: var(--radius-md);
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 539px) {
+  .hotel-photo-lightbox__inner {
+    padding: max(3rem, calc(env(safe-area-inset-top, 0px) + 2.25rem)) max(0.65rem, env(safe-area-inset-right, 0px))
+      max(0.75rem, env(safe-area-inset-bottom, 0px)) max(0.65rem, env(safe-area-inset-left, 0px));
+    gap: 0.55rem;
+  }
+
+  .hotel-photo-lightbox__img {
+    max-width: min(100%, calc(100vw - 1.25rem));
+    max-height: min(calc(100dvh - 7rem), calc(100vw - 1.25rem));
+  }
 }
 
 .hotel-photo-lightbox__caption {
@@ -1696,6 +1709,23 @@ h3,
   object-fit: cover;
   border-radius: var(--radius-sm);
   display: block;
+}
+
+@media (max-width: 719px) {
+  .hotel-wellness--with-photo .hotel-wellness__figure {
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, rgba(252, 251, 248, 0.5), rgba(245, 242, 236, 0.65));
+  }
+
+  .hotel-wellness__figure img {
+    aspect-ratio: auto;
+    max-height: min(52vh, 420px);
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+  }
 }
 
 /* —— Pagina Camere: tipologie a fasce + servizi raggruppati —— */

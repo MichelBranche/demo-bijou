@@ -21,13 +21,18 @@ function TerritoryPage() {
     if (!root) return undefined
 
     const reduced = prefersReducedMotion()
-    const lenis = reduced
-      ? null
-      : new Lenis({
-          duration: 1.5,
-          smoothWheel: true,
-          smoothTouch: false,
-        })
+    /* Lenis + ScrollTrigger su iOS/Android spesso non aggiornano i trigger in tempo:
+       il contenuto resta con opacity:0 da gsap.from → “buco” bianco fino al footer. */
+    const skipLenisMobile =
+      typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+    const lenis =
+      reduced || skipLenisMobile
+        ? null
+        : new Lenis({
+            duration: 1.5,
+            smoothWheel: true,
+            smoothTouch: false,
+          })
 
     let tickerCallback = () => {}
     if (lenis) {
@@ -48,8 +53,9 @@ function TerritoryPage() {
 
     const onceScroll = (trigger) => ({
       trigger,
-      start: 'top 86%',
+      start: 'top 88%',
       once: true,
+      invalidateOnRefresh: true,
     })
 
     const ctx = gsap.context(() => {
@@ -65,6 +71,7 @@ function TerritoryPage() {
           duration: 0.78,
           stagger: 0.11,
           ease: easing,
+          immediateRender: false,
           scrollTrigger: { ...onceScroll(hero), start: 'top 84%' },
         })
       }
@@ -81,6 +88,7 @@ function TerritoryPage() {
             opacity: 0,
             duration: 0.82,
             ease: easing,
+            immediateRender: false,
           })
           .from(
             heroImg,
@@ -89,6 +97,7 @@ function TerritoryPage() {
               duration: 1.15,
               ease: easing,
               transformOrigin: '50% 50%',
+              immediateRender: false,
             },
             '-=0.62',
           )
@@ -102,6 +111,7 @@ function TerritoryPage() {
           duration: 1.02,
           ease: easing,
           transformOrigin: '50% 50%',
+          immediateRender: false,
           scrollTrigger: onceScroll(figure),
         })
       })
@@ -113,6 +123,7 @@ function TerritoryPage() {
           opacity: 0,
           duration: 0.72,
           ease: easing,
+          immediateRender: false,
           scrollTrigger: onceScroll(opening),
         })
       }
@@ -126,6 +137,7 @@ function TerritoryPage() {
           duration: 0.64,
           stagger: 0.055,
           ease: easing,
+          immediateRender: false,
           scrollTrigger: onceScroll(section),
         })
       })
@@ -137,14 +149,30 @@ function TerritoryPage() {
           opacity: 0,
           duration: 0.68,
           ease: easing,
+          immediateRender: false,
           scrollTrigger: onceScroll(foot),
         })
       }
     }, root)
 
-    queueMicrotask(() => ScrollTrigger.refresh())
+    const refreshSt = () => {
+      ScrollTrigger.refresh()
+    }
+    queueMicrotask(refreshSt)
+    requestAnimationFrame(refreshSt)
+    requestAnimationFrame(() => requestAnimationFrame(refreshSt))
+    const t50 = window.setTimeout(refreshSt, 50)
+    const t250 = window.setTimeout(refreshSt, 250)
+    const onLoad = () => refreshSt()
+    window.addEventListener('load', onLoad, { once: true })
+    const vv = window.visualViewport
+    if (vv) vv.addEventListener('resize', refreshSt)
 
     return () => {
+      window.clearTimeout(t50)
+      window.clearTimeout(t250)
+      window.removeEventListener('load', onLoad)
+      if (vv) vv.removeEventListener('resize', refreshSt)
       window.removeEventListener('scroll', onScroll)
       ctx.revert()
       if (lenis) {

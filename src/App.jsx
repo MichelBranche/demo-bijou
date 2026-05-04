@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import './App.css'
@@ -32,6 +32,11 @@ function App() {
       window.matchMedia('(max-width: 768px)').matches,
   )
   const reducePresentationMotion = useReducedMotion()
+  const menuOpenRef = useRef(menuOpen)
+
+  useLayoutEffect(() => {
+    menuOpenRef.current = menuOpen
+  }, [menuOpen])
 
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
@@ -72,7 +77,9 @@ function App() {
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => {
-      document.body.style.overflow = prevOverflow
+      if (!menuOpenRef.current) {
+        document.body.style.overflow = prevOverflow
+      }
     }
   }, [bootLoaderMounted])
 

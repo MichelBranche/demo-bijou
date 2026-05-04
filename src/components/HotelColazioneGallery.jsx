@@ -38,17 +38,23 @@ const photoVariants = {
 
 /** Box finale centrato nella viewport • max come in CSS `.hotel-photo-lightbox__img`. */
 function getLightboxTargetBox(imgEl) {
-  const vw = window.innerWidth
-  const vh = window.innerHeight
+  const vv = window.visualViewport
+  const vw = Math.round(Math.min(vv?.width ?? window.innerWidth, window.innerWidth))
+  const vh = Math.round(Math.min(vv?.height ?? window.innerHeight, window.innerHeight))
   const nw = imgEl.naturalWidth || vw
   const nh = imgEl.naturalHeight || vh
-  const maxW = Math.min(1200, vw * 0.94)
-  const maxH = Math.min(900, vh * 0.78)
+  const inset = vw < 480 ? 10 : 14
+  const padReserve = vw < 540 ? 88 : 64
+  const maxW = Math.min(1200, vw - inset * 2)
+  const maxH = Math.min(900, Math.max(120, Math.floor(vh * (vw < 540 ? 0.62 : 0.76) - padReserve)))
   const scale = Math.min(maxW / nw, maxH / nh, 1)
   const fw = Math.round(nw * scale)
   const fh = Math.round(nh * scale)
-  const cx = Math.max(10, Math.round((vw - fw) / 2))
-  const cy = Math.max(52, Math.round((vh - fh) / 2))
+  const cx = Math.max(inset, Math.round((vw - fw) / 2))
+  const cy = Math.max(
+    Math.round(inset + (typeof vv?.offsetTop === 'number' ? vv.offsetTop : 0)),
+    Math.round((vh - fh) / 2),
+  )
   return { cx, cy, fw, fh }
 }
 
@@ -84,6 +90,9 @@ export default function HotelColazioneGallery({ photos, animationDelay = 0.35 })
 
   const reducedOnMount = typeof window !== 'undefined' ? prefersReducedMotion() : false
   const [reduced, setReduced] = useState(reducedOnMount)
+  const [narrowViewport, setNarrowViewport] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 719px)').matches,
+  )
   const [isVisible, setIsVisible] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const [viewerIndex, setViewerIndex] = useState(/** @type {number | null} */ (null))
@@ -104,6 +113,15 @@ export default function HotelColazioneGallery({ photos, animationDelay = 0.35 })
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     const sync = () => setReduced(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const mq = window.matchMedia('(max-width: 719px)')
+    const sync = () => setNarrowViewport(mq.matches)
     sync()
     mq.addEventListener('change', sync)
     return () => mq.removeEventListener('change', sync)
@@ -167,7 +185,8 @@ export default function HotelColazioneGallery({ photos, animationDelay = 0.35 })
 
     const run = () => {
       const { cx, cy, fw, fh } = getLightboxTargetBox(imgEl)
-      imgEl.style.objectFit = 'cover'
+      const narrow = typeof window !== 'undefined' && window.innerWidth < 540
+      imgEl.style.objectFit = narrow ? 'contain' : 'cover'
 
       const navEls = dlg?.querySelectorAll('.hotel-photo-lightbox__nav, .hotel-photo-lightbox__close') ?? []
 
@@ -299,7 +318,8 @@ export default function HotelColazioneGallery({ photos, animationDelay = 0.35 })
       return
     }
 
-    imgEl.style.objectFit = 'cover'
+    const narrowClose = typeof window !== 'undefined' && window.innerWidth < 540
+    imgEl.style.objectFit = narrowClose ? 'contain' : 'cover'
 
     const vr = imgEl.getBoundingClientRect()
     const thumbRect = readThumbRect(galleryFanRootRef.current, idx)
@@ -461,7 +481,9 @@ export default function HotelColazioneGallery({ photos, animationDelay = 0.35 })
     </dialog>
   )
 
-  if (reduced) {
+  const useStaticLayout = reduced || narrowViewport
+
+  if (useStaticLayout) {
     return (
       <>
         <div ref={galleryFanRootRef} className="hotel-colazione-fan hotel-colazione-fan--static">

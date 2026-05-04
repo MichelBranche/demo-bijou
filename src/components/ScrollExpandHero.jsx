@@ -75,6 +75,7 @@ export default function ScrollExpandHero({
     typeof window !== 'undefined' ? window.innerWidth < 768 : false,
   )
 
+  const scrollExpandRootRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const scrollCueRootRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const typeRootRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const lineLeftRef = useRef(/** @type {HTMLSpanElement | null} */ (null))
@@ -323,6 +324,16 @@ export default function ScrollExpandHero({
   useEffect(() => {
     if (reduced) return undefined
 
+    const touchInsideHero = (clientX, clientY) => {
+      const root = scrollExpandRootRef.current
+      if (!root) return false
+      const el = document.elementFromPoint(clientX, clientY)
+      return el instanceof Node && root.contains(el)
+    }
+
+    const wheelTargetInsideHero = (e) =>
+      e.target instanceof Node && !!scrollExpandRootRef.current?.contains(e.target)
+
     const lockTopWhenClosed = () => {
       if (fullyExpandedRef.current) return
       if (typeof lenis !== 'undefined' && lenis) {
@@ -332,10 +343,13 @@ export default function ScrollExpandHero({
 
     let touchLastY = 0
     const touchStartHandler = (e) => {
-      touchLastY = e.touches[0]?.clientY ?? 0
+      const t = e.touches[0]
+      if (!t || !touchInsideHero(t.clientX, t.clientY)) return
+      touchLastY = t.clientY
     }
 
     const wheel = (e) => {
+      if (!wheelTargetInsideHero(e)) return
       if (reversingRef.current && rewindRafRef.current && e.deltaY > 0) {
         cancelRewind()
         reversingRef.current = false
@@ -374,6 +388,10 @@ export default function ScrollExpandHero({
       const t = e.touches[0]
       if (!t) return
       const y = t.clientY
+      if (!touchInsideHero(t.clientX, t.clientY)) {
+        touchLastY = y
+        return
+      }
       const dy = touchLastY - y
 
       if (reversingRef.current && rewindRafRef.current && dy < -1.5) {
@@ -454,7 +472,7 @@ export default function ScrollExpandHero({
   const mediaHeight = isMobileState ? 400 + progress * 200 : 380 + progress * 420
 
   return (
-    <div className="scroll-expand-root">
+    <div ref={scrollExpandRootRef} className="scroll-expand-root">
       <section className="scroll-expand-section" aria-label="Introduzione">
         <div className="scroll-expand-fill">
           <motion.div
