@@ -1,0 +1,172 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+/* Tailwind: theme + utilities only (no Preflight: evita reset globali su index.css esistente). */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+:root {
+  --font-serif: 'Cormorant', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --bg-color: #f7f5f0;
+  --surface-elevated: #fffefb;
+  --text-main: #1f1c19;
+  --text-muted: #5c574f;
+  --border-color: #e6e2d8;
+  --accent: #831517;
+  --accent-hover: #6b1119;
+  --accent-soft: #a8494d;
+  --sand: #c4b8a8;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --shadow-soft: 0 24px 60px rgba(31, 28, 25, 0.1);
+  --focus-ring: 2px solid var(--accent);
+  --focus-ring-offset: 3px;
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Hero sottotitolo: località vs regione */
+  --hero-sub-place: rgba(252, 250, 245, 0.94);
+  --hero-sub-region: #dcc5a5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hero-sub-region: #e5d4b8;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --hero-sub-region: #f0e6d4;
+    --hero-sub-place: rgba(255, 252, 248, 0.98);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scrollbar-gutter: auto;
+  }
+}
+
+::selection {
+  background-color: rgba(131, 21, 23, 0.18);
+  color: var(--text-main);
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root > * {
+  flex-shrink: 0;
+}
+
+/* Colonna principale (nav + main + footer) quando il contenuto è avvolto per es. durante lo splash */
+.app-shell {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+#main-content {
+  flex: 1 0 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+/*
+  Media fluidi: evita foto che spillano dalla colonna quando manca width/max-width nei componenti.
+  Le varianti “slot” (cover + altezza fissa) continuano ad usare height: 100% / object-fit dopo questa base.
+*/
+img,
+video {
+  max-width: 100%;
+}
+
+/* URL e parole molto lunghe senza slogare layout */
+#main-content :is(p, li, dd, td, figcaption, blockquote) {
+  overflow-wrap: break-word;
+}
+
+#main-content :is(h1, h2, h3, h4, h5, h6) {
+  overflow-wrap: break-word;
+}
+
+:where(a, button, input, textarea, select):focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+:where(.btn-book-inline, .nav-cta):focus-visible,
+:where(.nav-toggle):focus-visible {
+  outline-color: var(--accent);
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.85rem;
+  top: 0.65rem;
+  z-index: 400;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.81rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #faf6ef;
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  transform: translateY(-140%);
+  transition: transform 0.3s var(--ease-out-expo);
+}
+
+.skip-link:focus {
+  outline: none;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition-duration: 0.01ms;
+  }
+}
