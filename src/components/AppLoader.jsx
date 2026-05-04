@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { HotelStars } from './HotelStars'
 import './AppLoader.css'
 
 /**
@@ -11,7 +12,7 @@ export default function AppLoader({ reduceMotion }) {
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label="Caricamento sito Hotel Bijou"
+      aria-label="Caricamento sito Hotel Bijou tre stelle"
       initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
       animate={{
         opacity: 1,
@@ -32,6 +33,7 @@ export default function AppLoader({ reduceMotion }) {
       <div className="app-boot__inner">
         <div className="app-boot__line" aria-hidden="true" />
         <div className="app-boot__mark">Hotel Bijou</div>
+        <HotelStars className="hotel-stars--boot" size={16} decorative />
         <p className="app-boot__sub">Boutique hotel · Saint-Vincent</p>
         <p className="app-boot__tag">Valle d&apos;Aosta</p>
         <div className="app-boot__progress" aria-hidden="true">

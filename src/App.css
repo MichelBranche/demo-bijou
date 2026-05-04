@@ -86,7 +86,7 @@ h3,
 .brand-lockup {
   display: inline-flex;
   flex-direction: row;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 0.35rem;
   row-gap: 0;
@@ -122,6 +122,30 @@ h3,
   letter-spacing: 0.14em;
   color: var(--text-muted);
   line-height: 1;
+}
+
+.hotel-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  color: #9a7229;
+}
+
+.hotel-stars__icon {
+  flex-shrink: 0;
+}
+
+.hotel-stars--navbar {
+  margin-inline: 0.06rem 0.1rem;
+}
+
+.footer__wordmark-heavy {
+  margin-top: -0.06em;
+}
+
+.footer__wordmark-heavy .footer__wordmark-line--heavy {
+  display: block;
+  margin-top: 0;
 }
 
 .brand-lockup-sub-long {

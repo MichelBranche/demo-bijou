@@ -47,6 +47,12 @@
   line-height: 1.08;
 }
 
+.hotel-stars--boot {
+  justify-content: center;
+  margin-top: 0.65rem;
+  color: #9a7229;
+}
+
 .app-boot__sub {
   margin-top: 0.85rem;
   font-size: 0.74rem;

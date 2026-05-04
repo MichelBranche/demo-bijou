@@ -3,6 +3,7 @@ import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import './App.css'
 import AppLoader from './components/AppLoader'
+import { HotelStars } from './components/HotelStars'
 import { SplashRevealDoneContext } from './context/SplashRevealDoneContext'
 import { BOOKING_URL } from './booking'
 import HomePage from './pages/HomePage'
@@ -171,8 +172,14 @@ function App() {
         aria-label="Principale"
       >
         <div className="navbar-bar">
-          <NavLink end to="/" className="brand-lockup" aria-label="Hotel Bijou — Home">
+          <NavLink
+            end
+            to="/"
+            className="brand-lockup"
+            aria-label="Hotel Bijou tre stelle — Home"
+          >
             <span className="brand-lockup-mark">Bijou</span>
+            <HotelStars className="hotel-stars--navbar" size={12} decorative />
             <span className="brand-lockup-dot" aria-hidden="true">
               ·
             </span>
@@ -188,6 +195,7 @@ function App() {
               end
               className="nav-sheet-brand nav-only-mobile"
               to="/"
+              aria-label="Hotel Bijou tre stelle — Home"
               onClick={() => setMenuOpen(false)}
             >
               <span className="nav-sheet-brand__mark">Bijou</span>
@@ -386,7 +394,9 @@ function App() {
 
           <div className="footer__wordmark serif" aria-hidden="true">
             <span className="footer__wordmark-line">Hotel</span>
-            <span className="footer__wordmark-line footer__wordmark-line--heavy">Bijou</span>
+            <div className="footer__wordmark-heavy">
+              <span className="footer__wordmark-line footer__wordmark-line--heavy">Bijou</span>
+            </div>
           </div>
 
           <div className="footer__meta">

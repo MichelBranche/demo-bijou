@@ -1,16 +1,31 @@
-# React + Vite
+# Hotel Bijou · Saint-Vincent
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Front-end demo per l’**Hotel Bijou** di **Saint-Vincent** (Valle d’Aosta): home, struttura, camere, territorio e contatti, con intro loader, navigazione e animazioni curate.
 
-Currently, two official plugins are available:
+## Tech stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Area | Tecnologia |
+| --- | --- |
+| Runtime UI | **React** 19 |
+| Bundler & dev server | **Vite** 8 |
+| Routing | **react-router-dom** 7 |
+| Styling | **Tailwind CSS** 4 (plugin Vite `@tailwindcss/vite`) |
+| Animazioni | **Framer Motion** 12 · **GSAP** 3 |
+| Scroll fluido | **Lenis** |
+| Icone | **lucide-react** |
+| Qualità codice | **ESLint** · **typescript-eslint** (dipendenze Typescript anche per JSX/TSX misti) |
 
-## React Compiler
+Alias di import: `@/` → cartella `src/` (vedi `vite.config.js`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Custom ready
 
-## Expanding the ESLint configuration
+Pensato per essere adattato a brand e contenuti reali senza stravolgere la struttura:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Prenotazioni** — aggiorna l’URL in `src/booking.js` (`BOOKING_URL`).
+- **Menu e rotte** — voci e path in `src/App.jsx` (`navItems` e relative `Route`).
+- **Testi e dati aggregati** — file in `src/data/` (es. recensioni / reputation) e copy nelle pagine sotto `src/pages/`.
+- **Immagini** — modulo centralizzato in `src/assets/images.js` e risorse nella cartella `src/assets/`.
+- **Look & feel** — utility Tailwind in `src/App.css` e componenti sotto `src/components/`; le animazioni rispettano `prefers-reduced-motion` dove previsto (`motionPrefs.js`, contesto splash in `SplashRevealDoneContext`).
+- **Componenti TS** — alcuni blocchi sono in `.tsx` (es. gallery); il resto del progetto resta JSX con tipi Typescript disponibili per lint/typecheck.
+
+Puoi rinominare il package in `package.json`, sostituire copy e asset, collegare un altro motore booking o estendere le route mantenendo la stessa architettura.
