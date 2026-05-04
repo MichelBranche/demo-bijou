@@ -20,7 +20,7 @@ import Lenis from 'lenis'
 import gsap from 'gsap'
 import '../styles/camere-mockup.css'
 import { bijouImages } from '../assets/images'
-import { BOOKING_URL } from '../booking'
+import { BOOKING_URL, bookingEngineUrl } from '../booking'
 import { prefersReducedMotion } from '../motionPrefs'
 
 const roomImages = bijouImages.rooms
@@ -34,6 +34,7 @@ const roomTypes = [
     alt: 'Camera singola dal tono caldo · Hotel Bijou',
     guests: '1 ospite',
     bed: 'Letto singolo',
+    bookingParams: { tipologia: 'singola' },
   },
   {
     id: 'doppia-standard',
@@ -43,6 +44,7 @@ const roomTypes = [
     alt: 'Doppia standard con tessuti chiari · Hotel Bijou',
     guests: '2 ospiti',
     bed: 'Letto matrimoniale o twin',
+    bookingParams: { tipologia: 'doppia-standard' },
   },
   {
     id: 'doppia-vista',
@@ -52,6 +54,7 @@ const roomTypes = [
     alt: 'Doppia affacciata sulla piazza · Hotel Bijou',
     guests: '2 ospiti',
     bed: 'Letto matrimoniale o twin',
+    bookingParams: { tipologia: 'doppia-vista' },
   },
   {
     id: 'francese',
@@ -61,6 +64,7 @@ const roomTypes = [
     alt: 'Camera francese con dettagli classici · Hotel Bijou',
     guests: '2 ospiti',
     bed: 'Letto alla francese',
+    bookingParams: { tipologia: 'francese' },
   },
   {
     id: 'familiare',
@@ -70,6 +74,7 @@ const roomTypes = [
     alt: 'Camera familiare spaziosa · Hotel Bijou',
     guests: 'Fino a 4 ospiti',
     bed: 'Letti multipli',
+    bookingParams: { tipologia: 'familiare' },
   },
   {
     id: 'mini-suite',
@@ -79,6 +84,7 @@ const roomTypes = [
     alt: 'Mini suite luminosa · Hotel Bijou',
     guests: '2–3 ospiti',
     bed: 'Zona notte + soggiorno',
+    bookingParams: { tipologia: 'mini-suite' },
   },
 ]
 
@@ -265,7 +271,13 @@ function RoomsPage() {
                     {room.bed}
                   </span>
                 </div>
-                <a className="camere-m-card__more" href={`#${room.id}`}>
+                <a
+                  className="camere-m-card__more"
+                  href={bookingEngineUrl(room.bookingParams)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Verifica disponibilità: ${room.title}`}
+                >
                   Scopri di più
                   <ArrowRight size={16} strokeWidth={2} aria-hidden />
                 </a>
