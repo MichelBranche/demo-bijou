@@ -26,18 +26,24 @@ export default function ReputationShowcase({ revealed = true }) {
       const items = gsap.utils.toArray(section.querySelectorAll('.reputation-strip-reveal'))
       if (!items.length) return
 
-      gsap.to(items, {
-        y: 0,
-        opacity: 1,
-        duration: 0.78,
-        ease: 'power3.out',
-        stagger: 0.11,
-        scrollTrigger: {
-          trigger: section,
-          start: 'top 88%',
-          once: true,
+      gsap.set(items, { y: 20, opacity: 0, willChange: 'transform,opacity' })
+      gsap.fromTo(
+        items,
+        { y: 20, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.78,
+          ease: 'power3.out',
+          stagger: 0.11,
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 88%',
+            once: true,
+          },
+          onComplete: () => gsap.set(items, { clearProps: 'willChange' }),
         },
-      })
+      )
 
       queueMicrotask(() => ScrollTrigger.refresh())
     }, section)

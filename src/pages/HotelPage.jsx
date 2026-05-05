@@ -6,6 +6,8 @@ import SectionIntro from '@/components/hotel/SectionIntro'
 import ImageGallery from '@/components/hotel/ImageGallery'
 import Wellness from '@/components/hotel/Wellness'
 import AccessibilityCard from '@/components/hotel/AccessibilityCard'
+import { usePageSeo } from '@/hooks/usePageSeo'
+import { absoluteUrl } from '@/seo/siteSeo'
 import '@/styles/hotel-page.css'
 
 const hotelPhoto = bijouImages.hotelPage
@@ -23,6 +25,29 @@ const hotelColazioneAlts = [
 ]
 
 function HotelPage() {
+  usePageSeo({
+    title: 'Hotel · Spazi, colazione e benessere | Hotel Bijou',
+    description:
+      "Scopri gli ambienti dell'Hotel Bijou: arredi boutique, colazione valdostana, area benessere e struttura accessibile nel centro di Saint-Vincent.",
+    pathname: '/hotel',
+    image: absoluteUrl('/images/bijou/hotel/spazio-comuni-1.png'),
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Hotel',
+      url: absoluteUrl('/hotel'),
+      isPartOf: {
+        '@type': 'WebSite',
+        name: 'Hotel Bijou',
+        url: absoluteUrl('/'),
+      },
+      about: {
+        '@type': 'Hotel',
+        name: 'Hotel Bijou',
+      },
+    },
+  })
+
   const mainRef = useRef(null)
   const galleryRef = useRef(null)
 

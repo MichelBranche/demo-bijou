@@ -110,7 +110,6 @@ export function useTerritorioPageAnimations({ mainRef }) {
       } else {
         window.removeEventListener('scroll', syncNavScroll)
       }
-      ScrollTrigger.getAll().forEach((t) => t.kill())
     }
   }, [mainRef])
 }

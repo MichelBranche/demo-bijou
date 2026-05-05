@@ -8,6 +8,8 @@ import { SplashRevealDoneContext } from '../context/SplashRevealDoneContext'
 import ReputationShowcase from '../components/ReputationShowcase'
 import { bijouImages } from '../assets/images'
 import { prefersReducedMotion } from '../motionPrefs'
+import { usePageSeo } from '@/hooks/usePageSeo'
+import { absoluteUrl } from '@/seo/siteSeo'
 
 const editorialSlides = [
   {
@@ -49,6 +51,39 @@ const editorialSlides = [
 const REPUTATION_SCROLL_REVEAL_PX = 56
 
 function HomePage() {
+  usePageSeo({
+    title: 'Hotel Bijou · Boutique hotel a Saint-Vincent',
+    description:
+      "Hotel Bijou a Saint-Vincent, Valle d'Aosta: boutique hotel in piazza con camere curate, colazione locale e accesso comodo a terme, sport e territorio.",
+    pathname: '/',
+    image: absoluteUrl('/images/bijou/hero-piazza-saint-vincent.png'),
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Hotel',
+        name: 'Hotel Bijou',
+        url: absoluteUrl('/'),
+        image: absoluteUrl('/images/bijou/hero-piazza-saint-vincent.png'),
+        telephone: '+39 0166 510067',
+        email: 'info@bijouhotel.it',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Piazza Cavalieri di Vittorio Veneto, 3',
+          addressLocality: 'Saint-Vincent',
+          postalCode: '11027',
+          addressRegion: 'AO',
+          addressCountry: 'IT',
+        },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Hotel Bijou',
+        url: absoluteUrl('/'),
+      },
+    ],
+  })
+
   const horizontalSectionRef = useRef(null)
   const homeStoryGridRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const splashRevealDone = useContext(SplashRevealDoneContext)
@@ -188,147 +223,152 @@ function HomePage() {
       }
     }
 
-    const homeStorySection = document.querySelector('.home-story')
-    const homeStoryGridEl = homeStoryGridRef.current
+    const ctx = gsap.context(() => {
+      const homeStorySection = document.querySelector('.home-story')
+      const homeStoryGridEl = homeStoryGridRef.current
 
-    if (homeStorySection && homeStoryGridEl) {
-      const storyReveals = gsap.utils.toArray(homeStorySection.querySelectorAll('.home-story-reveal'))
+      if (homeStorySection && homeStoryGridEl) {
+        const storyReveals = gsap.utils.toArray(homeStorySection.querySelectorAll('.home-story-reveal'))
 
-      const tl = gsap.timeline({
-        defaults: { ease: 'power3.out' },
-        scrollTrigger: {
-          trigger: homeStorySection,
-          start: 'top 82%',
-        },
-      })
-
-      tl.fromTo(
-        homeStoryGridEl,
-        { opacity: 0, y: 40, scale: 0.985, filter: 'blur(12px)' },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          filter: 'blur(0px)',
-          duration: 0.88,
-          onComplete() {
-            gsap.set(homeStoryGridEl, { clearProps: 'filter' })
-          },
-        },
-      )
-
-      if (storyReveals.length) {
-        tl.fromTo(
-          storyReveals,
-          { y: 28, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.8,
-            stagger: 0.11,
-          },
-          '-=0.62',
-        )
-      }
-    }
-
-    const horizontalSection = document.querySelector('.horizontal-section')
-    const horizontalItems = gsap.utils.toArray('.horizontal-item')
-    const canUseHorizontalScroll =
-      isDesktop && horizontalSection && horizontalItems.length > 1
-
-    const scrollTween = canUseHorizontalScroll
-      ? gsap.to(horizontalItems, {
-          xPercent: -100 * (horizontalItems.length - 1),
-          ease: 'none',
+        const tl = gsap.timeline({
+          defaults: { ease: 'power3.out' },
           scrollTrigger: {
-            trigger: horizontalSection,
-            pin: true,
-            scrub: 1,
-            snap: 1 / (horizontalItems.length - 1),
-            end: () => `+=${horizontalSection.offsetWidth * 1.55}`,
+            trigger: homeStorySection,
+            start: 'top 82%',
           },
         })
-      : null
 
-    if (scrollTween) {
-      gsap.utils.toArray('.parallax-img').forEach((img) => {
-        gsap.fromTo(
-          img,
-          { objectPosition: '0% 50%' },
+        tl.fromTo(
+          homeStoryGridEl,
+          { opacity: 0, y: 40, scale: 0.985, filter: 'blur(12px)' },
           {
-            objectPosition: '100% 50%',
-            ease: 'none',
-            scrollTrigger: {
-              trigger: img.parentElement,
-              containerAnimation: scrollTween,
-              start: 'left right',
-              end: 'right left',
-              scrub: true,
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            filter: 'blur(0px)',
+            duration: 0.88,
+            onComplete() {
+              gsap.set(homeStoryGridEl, { clearProps: 'filter' })
             },
           },
         )
-      })
-    } else if (isDesktop) {
-      gsap.utils.toArray('.parallax-img').forEach((img) => {
-        gsap.fromTo(
-          img,
-          { yPercent: -4 },
-          {
-            yPercent: 6,
+
+        if (storyReveals.length) {
+          gsap.set(storyReveals, { y: 28, opacity: 0 })
+          tl.to(
+            storyReveals,
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.8,
+              stagger: 0.11,
+              onComplete: () => gsap.set(storyReveals, { clearProps: 'willChange' }),
+            },
+            '-=0.62',
+          )
+        }
+      }
+
+      const horizontalSection = document.querySelector('.horizontal-section')
+      const horizontalItems = gsap.utils.toArray('.horizontal-item')
+      const canUseHorizontalScroll =
+        isDesktop && horizontalSection && horizontalItems.length > 1
+
+      const scrollTween = canUseHorizontalScroll
+        ? gsap.to(horizontalItems, {
+            xPercent: -100 * (horizontalItems.length - 1),
             ease: 'none',
             scrollTrigger: {
-              trigger: img.closest('.horizontal-item'),
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: true,
+              trigger: horizontalSection,
+              pin: true,
+              scrub: 1,
+              snap: 1 / (horizontalItems.length - 1),
+              end: () => `+=${horizontalSection.offsetWidth * 1.55}`,
             },
-          },
-        )
-      })
-    }
-
-    gsap.utils.toArray('.horizontal-item').forEach((item, index) => {
-      const revealTargets = item.querySelectorAll('.slide-reveal')
-      const tl = gsap.timeline({ paused: true })
-      tl.to(revealTargets, {
-        y: 0,
-        opacity: 1,
-        duration: 0.72,
-        ease: 'power3.out',
-        stagger: 0.12,
-      })
+          })
+        : null
 
       if (scrollTween) {
-        ScrollTrigger.create({
-          trigger: item,
-          containerAnimation: scrollTween,
-          start: 'left center+=160',
-          end: 'right center-=80',
-          onEnter: () => tl.play(),
-          onEnterBack: () => tl.play(),
-          onLeaveBack: () => tl.pause(0),
+        gsap.utils.toArray('.parallax-img').forEach((img) => {
+          gsap.fromTo(
+            img,
+            { objectPosition: '0% 50%' },
+            {
+              objectPosition: '100% 50%',
+              ease: 'none',
+              scrollTrigger: {
+                trigger: img.parentElement,
+                containerAnimation: scrollTween,
+                start: 'left right',
+                end: 'right left',
+                scrub: true,
+              },
+            },
+          )
         })
       } else if (isDesktop) {
-        ScrollTrigger.create({
-          trigger: item,
-          start: 'top 80%',
-          onEnter: () => tl.play(),
-          onEnterBack: () => tl.play(),
-          onLeaveBack: () => tl.pause(0),
+        gsap.utils.toArray('.parallax-img').forEach((img) => {
+          gsap.fromTo(
+            img,
+            { yPercent: -4 },
+            {
+              yPercent: 6,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: img.closest('.horizontal-item'),
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: true,
+              },
+            },
+          )
         })
-      } else {
-        gsap.set(revealTargets, { y: 0, opacity: 1, clearProps: 'transform' })
       }
 
-      if (index === 0) {
-        tl.play(0)
-      }
+      gsap.utils.toArray('.horizontal-item').forEach((item, index) => {
+        const revealTargets = item.querySelectorAll('.slide-reveal')
+        gsap.set(revealTargets, { y: 24, opacity: 0, willChange: 'transform,opacity' })
+        const tl = gsap.timeline({ paused: true })
+        tl.to(revealTargets, {
+          y: 0,
+          opacity: 1,
+          duration: 0.72,
+          ease: 'power3.out',
+          stagger: 0.12,
+          onComplete: () => gsap.set(revealTargets, { clearProps: 'willChange' }),
+        })
+
+        if (scrollTween) {
+          ScrollTrigger.create({
+            trigger: item,
+            containerAnimation: scrollTween,
+            start: 'left center+=160',
+            end: 'right center-=80',
+            onEnter: () => tl.play(),
+            onEnterBack: () => tl.play(),
+            onLeaveBack: () => tl.pause(0),
+          })
+        } else if (isDesktop) {
+          ScrollTrigger.create({
+            trigger: item,
+            start: 'top 80%',
+            onEnter: () => tl.play(),
+            onEnterBack: () => tl.play(),
+            onLeaveBack: () => tl.pause(0),
+          })
+        } else {
+          gsap.set(revealTargets, { y: 0, opacity: 1, clearProps: 'transform' })
+        }
+
+        if (index === 0) {
+          tl.play(0)
+        }
+      })
     })
 
     return () => {
       horizontalEl?.classList.remove('horizontal-static')
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill())
+      ctx.revert()
     }
   }, [])
 

@@ -6,6 +6,8 @@ import TerritorioFeatureSplit from '@/components/territorio/TerritorioFeatureSpl
 import TerritorioChecklist from '@/components/territorio/TerritorioChecklist'
 import TerritorioNumberedList from '@/components/territorio/TerritorioNumberedList'
 import TerritorioInfoGrid from '@/components/territorio/TerritorioInfoGrid'
+import { usePageSeo } from '@/hooks/usePageSeo'
+import { absoluteUrl } from '@/seo/siteSeo'
 import '@/styles/territorio-page.css'
 
 /** Fonti istituzionali / concessionari noti — controllati su contenuto visitatore. */
@@ -78,6 +80,25 @@ const infoCards = [
 ]
 
 function TerritoryPage() {
+  usePageSeo({
+    title: 'Territorio · Valle d’Aosta, terme e attività | Hotel Bijou',
+    description:
+      "Guida al territorio di Saint-Vincent: Casinò de la Vallée, terme, sport, natura, cultura ed eventi in Valle d'Aosta con consigli pratici dall'Hotel Bijou.",
+    pathname: '/territorio',
+    image: absoluteUrl('/images/territorio/terme-benessere.png'),
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Territorio',
+      url: absoluteUrl('/territorio'),
+      isPartOf: {
+        '@type': 'WebSite',
+        name: 'Hotel Bijou',
+        url: absoluteUrl('/'),
+      },
+    },
+  })
+
   const mainRef = useRef(/** @type {HTMLElement | null} */ (null))
   useTerritorioPageAnimations({ mainRef })
 

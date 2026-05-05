@@ -5,8 +5,30 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { bijouImages } from '../assets/images'
 import { BOOKING_URL } from '../booking'
 import { prefersReducedMotion } from '../motionPrefs'
+import { usePageSeo } from '@/hooks/usePageSeo'
+import { absoluteUrl } from '@/seo/siteSeo'
 
 function ContactPage() {
+  usePageSeo({
+    title: 'Contatti e prenotazioni | Hotel Bijou Saint-Vincent',
+    description:
+      "Contatta Hotel Bijou a Saint-Vincent: telefono, email, mappa e modulo richieste per prenotazioni, informazioni camere, accessibilità e soggiorno.",
+    pathname: '/contatti',
+    image: absoluteUrl('/images/bijou/hero-piazza-saint-vincent.png'),
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'ContactPage',
+      name: 'Contatti Hotel Bijou',
+      url: absoluteUrl('/contatti'),
+      mainEntity: {
+        '@type': 'Hotel',
+        name: 'Hotel Bijou',
+        telephone: '+39 0166 510067',
+        email: 'info@bijouhotel.it',
+      },
+    },
+  })
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',

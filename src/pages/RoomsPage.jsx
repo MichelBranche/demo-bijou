@@ -22,6 +22,8 @@ import '../styles/camere-mockup.css'
 import { bijouImages } from '../assets/images'
 import { BOOKING_URL, bookingEngineUrl } from '../booking'
 import { prefersReducedMotion } from '../motionPrefs'
+import { usePageSeo } from '@/hooks/usePageSeo'
+import { absoluteUrl } from '@/seo/siteSeo'
 
 const roomImages = bijouImages.rooms
 
@@ -130,6 +132,25 @@ const duoGallery =
   ambientExtra.length >= 2 ? ambientExtra.slice(0, 2) : [roomImages[0], roomImages[1]]
 
 function RoomsPage() {
+  usePageSeo({
+    title: 'Camere · Tipologie e servizi | Hotel Bijou',
+    description:
+      "Camere Hotel Bijou a Saint-Vincent: singola, doppia, familiare e mini suite con servizi inclusi, pulizia quotidiana e prenotazione diretta.",
+    pathname: '/camere',
+    image: absoluteUrl('/images/bijou/crp955x600-room-index3.jpg'),
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Camere',
+      url: absoluteUrl('/camere'),
+      isPartOf: {
+        '@type': 'WebSite',
+        name: 'Hotel Bijou',
+        url: absoluteUrl('/'),
+      },
+    },
+  })
+
   useEffect(() => {
     const reduced = prefersReducedMotion()
     const lenis = reduced

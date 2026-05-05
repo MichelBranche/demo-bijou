@@ -188,7 +188,6 @@ export function useHotelPageAnimations({ mainRef, galleryRef }) {
       } else {
         window.removeEventListener('scroll', syncNavScroll)
       }
-      ScrollTrigger.getAll().forEach((t) => t.kill())
     }
   }, [galleryRef, mainRef])
 }
