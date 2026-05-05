@@ -11,10 +11,9 @@ export function prefersReducedMotion() {
   const saveData = Boolean(conn?.saveData)
   const effectiveType = conn?.effectiveType ?? ''
   const downlink = Number(conn?.downlink ?? 10)
-  const lowBandwidth = Number.isFinite(downlink) && downlink > 0 && downlink <= 1.5
+  const lowBandwidth = Number.isFinite(downlink) && downlink > 0 && downlink <= 0.8
   const legacyNetwork = effectiveType === 'slow-2g' || effectiveType === '2g'
-  const lowCpu = typeof nav?.hardwareConcurrency === 'number' && nav.hardwareConcurrency <= 4
-  const lowMemory = typeof nav?.deviceMemory === 'number' && nav.deviceMemory <= 4
 
-  return saveData || lowBandwidth || legacyNetwork || lowCpu || lowMemory
+  // Non usare CPU/RAM come discriminante: su molti desktop moderni falserebbe il risultato.
+  return saveData || lowBandwidth || legacyNetwork
 }
