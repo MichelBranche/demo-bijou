@@ -47,6 +47,7 @@ export function useTerritorioPageAnimations({ mainRef }) {
 
     const onResize = () => ScrollTrigger.refresh()
     window.addEventListener('resize', onResize)
+    let safetyRevealTimeout = 0
 
     const ctx = gsap.context(() => {
       if (reduced) {
@@ -99,9 +100,25 @@ export function useTerritorioPageAnimations({ mainRef }) {
           },
         })
       })
+
+      // Failsafe per connessioni lente: forza visibilità completa se l'animazione non parte.
+      safetyRevealTimeout = window.setTimeout(() => {
+        gsap.set(
+          main.querySelectorAll(
+            '.territorio-hero__label, .territorio-hero__title, .territorio-hero__intro, .territorio-hero__after, [data-reveal]',
+          ),
+          { opacity: 1, y: 0, clearProps: 'willChange' },
+        )
+        gsap.set(main.querySelectorAll('.territorio-hero__media'), {
+          clipPath: 'inset(0% 0% 0% 0%)',
+          clearProps: 'willChange',
+        })
+        gsap.set(main.querySelectorAll('.territorio-hero__media-inner'), { scale: 1 })
+      }, 2400)
     }, main)
 
     return () => {
+      window.clearTimeout(safetyRevealTimeout)
       ctx.revert()
       window.removeEventListener('resize', onResize)
       if (lenis) {

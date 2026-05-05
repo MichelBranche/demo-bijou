@@ -131,7 +131,7 @@ export default function ScrollExpandHero({
   /** Scorrevolezza delle righe legata allo stesso progress della hero (equivale ai vecchi translateX inline). */
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return undefined
-    const amp = isMobileState ? 28 : 18
+    const amp = isMobileState ? 0 : 18
     const slidePx = reduced ? amp : progress * amp
     const pairs = /** @type {const} */ ([
       [lineLeftRef.current, -slidePx],
@@ -524,18 +524,26 @@ export default function ScrollExpandHero({
 
             <div ref={typeRootRef} className="scroll-expand-type">
               <h1 className="scroll-expand-heading serif">
-                <span
-                  ref={lineLeftRef}
-                  className="scroll-expand-line scroll-expand-line--left scroll-expand-type-motion"
-                >
-                  {firstWord}
-                </span>
-                <span
-                  ref={lineRestRef}
-                  className="scroll-expand-line scroll-expand-line--rest scroll-expand-type-motion"
-                >
-                  {restWords}
-                </span>
+                {isMobileState ? (
+                  <span className="scroll-expand-line scroll-expand-line--full scroll-expand-type-motion">
+                    {title}
+                  </span>
+                ) : (
+                  <>
+                    <span
+                      ref={lineLeftRef}
+                      className="scroll-expand-line scroll-expand-line--left scroll-expand-type-motion"
+                    >
+                      {firstWord}
+                    </span>
+                    <span
+                      ref={lineRestRef}
+                      className="scroll-expand-line scroll-expand-line--rest scroll-expand-type-motion"
+                    >
+                      {restWords}
+                    </span>
+                  </>
+                )}
               </h1>
               {subtitle && (
                 <p ref={typeSubRef} className="scroll-expand-sub scroll-expand-type-motion">

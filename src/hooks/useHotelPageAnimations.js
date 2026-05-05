@@ -49,6 +49,7 @@ export function useHotelPageAnimations({ mainRef, galleryRef }) {
       ScrollTrigger.refresh()
     }
     window.addEventListener('resize', onResize)
+    let safetyRevealTimeout = 0
 
     const ctx = gsap.context(() => {
       if (reduced) {
@@ -152,6 +153,21 @@ export function useHotelPageAnimations({ mainRef, galleryRef }) {
           },
         )
       }
+
+      // Failsafe rete/device lenti: evita sezioni bloccate a metà (opacity 0 / clip-path chiuso).
+      safetyRevealTimeout = window.setTimeout(() => {
+        gsap.set(
+          main.querySelectorAll(
+            '.hotel-hero__label, .hotel-hero__title, .hotel-hero__lede, [data-reveal]',
+          ),
+          { opacity: 1, y: 0, clearProps: 'willChange' },
+        )
+        gsap.set(main.querySelectorAll('.hotel-hero__media, .hotel-gallery-pin__mask-inner'), {
+          clipPath: 'inset(0% 0% 0% 0%)',
+          clearProps: 'willChange',
+        })
+        gsap.set(main.querySelectorAll('.hotel-hero__media-inner'), { scale: 1 })
+      }, 2400)
     }, main)
 
     let disposeCardHover = () => {}
@@ -180,6 +196,7 @@ export function useHotelPageAnimations({ mainRef, galleryRef }) {
 
     return () => {
       disposeCardHover()
+      window.clearTimeout(safetyRevealTimeout)
       ctx.revert()
       window.removeEventListener('resize', onResize)
       if (lenis) {

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import './App.css'
@@ -6,11 +6,12 @@ import AppLoader from './components/AppLoader'
 import { SplashRevealDoneContext } from './context/SplashRevealDoneContext'
 import Navbar from './components/hotel/Navbar'
 import Footer from './components/hotel/Footer'
-import HomePage from './pages/HomePage'
-import HotelPage from './pages/HotelPage'
-import RoomsPage from './pages/RoomsPage'
-import TerritoryPage from './pages/TerritoryPage'
-import ContactPage from './pages/ContactPage'
+
+const HomePage = lazy(() => import('./pages/HomePage'))
+const HotelPage = lazy(() => import('./pages/HotelPage'))
+const RoomsPage = lazy(() => import('./pages/RoomsPage'))
+const TerritoryPage = lazy(() => import('./pages/TerritoryPage'))
+const ContactPage = lazy(() => import('./pages/ContactPage'))
 
 function App() {
   const location = useLocation()
@@ -77,6 +78,8 @@ function App() {
   useEffect(() => {
     let cancelled = false
     const minMs = reducePresentationMotion ? 280 : 1180
+    // Rete lenta: non aspettare indefinitamente il `load` completo (immagini/font esterni).
+    const maxBootWaitMs = reducePresentationMotion ? 900 : 2600
     const t0 = typeof performance !== 'undefined' ? performance.now() : 0
 
     const loadPromise =
@@ -87,9 +90,14 @@ function App() {
           )
 
     const fontPromise = document.fonts?.ready ?? Promise.resolve()
+    let timeoutId = 0
+    const timeoutPromise = new Promise((resolve) => {
+      timeoutId = window.setTimeout(resolve, maxBootWaitMs)
+    })
 
-    Promise.all([loadPromise, fontPromise]).then(() => {
+    Promise.race([Promise.all([loadPromise, fontPromise]), timeoutPromise]).then(() => {
       if (cancelled) return
+      window.clearTimeout(timeoutId)
       const elapsed =
         typeof performance !== 'undefined' ? performance.now() - t0 : minMs
       const rest = Math.max(0, minMs - elapsed)
@@ -100,6 +108,7 @@ function App() {
 
     return () => {
       cancelled = true
+      window.clearTimeout(timeoutId)
     }
   }, [reducePresentationMotion])
 
@@ -176,13 +185,15 @@ function App() {
           exit={pageMotion.exit}
           transition={pageMotion.transition}
         >
-          <Routes location={location}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/hotel" element={<HotelPage />} />
-            <Route path="/camere" element={<RoomsPage />} />
-            <Route path="/territorio" element={<TerritoryPage />} />
-            <Route path="/contatti" element={<ContactPage />} />
-          </Routes>
+          <Suspense fallback={<div style={{ minHeight: '40vh' }} aria-hidden />}>
+            <Routes location={location}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/hotel" element={<HotelPage />} />
+              <Route path="/camere" element={<RoomsPage />} />
+              <Route path="/territorio" element={<TerritoryPage />} />
+              <Route path="/contatti" element={<ContactPage />} />
+            </Routes>
+          </Suspense>
         </motion.main>
       </AnimatePresence>
 

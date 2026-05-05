@@ -831,7 +831,7 @@ h3,
   align-items: center;
   gap: 0.35rem;
   font-weight: 400;
-  line-height: 0;
+  line-height: 1;
 }
 
 .scroll-expand-heading .scroll-expand-line {
@@ -901,6 +901,36 @@ h3,
 @media (max-width: 480px) {
   .scroll-expand-sub__place {
     letter-spacing: 0.07em;
+  }
+}
+
+@media (max-width: 768px) {
+  .scroll-expand-stage-inner {
+    padding-top: max(5.2rem, calc(env(safe-area-inset-top) + 4.6rem));
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+  }
+
+  .scroll-expand-heading .scroll-expand-line {
+    font-size: clamp(2.55rem, 13vw, 3.35rem);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+  }
+
+  .scroll-expand-sub {
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-top: 0.7rem;
+    font-size: clamp(1rem, 5vw, 1.4rem);
+  }
+
+  .scroll-expand-sub__sep {
+    display: none;
+  }
+
+  .scroll-expand-eyebrow {
+    margin-top: 0.6rem;
+    letter-spacing: 0.11em;
+    text-align: center;
   }
 }
 
