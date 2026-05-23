@@ -30,4 +30,7 @@ Pensato per essere adattato a brand e contenuti reali senza stravolgere la strut
 - **Look & feel** — utility Tailwind in `src/App.css` e componenti sotto `src/components/`; le animazioni rispettano `prefers-reduced-motion` dove previsto (`motionPrefs.js`, contesto splash in `SplashRevealDoneContext`).
 - **Componenti TS** — alcuni blocchi sono in `.tsx` (es. gallery); il resto del progetto resta JSX con tipi Typescript disponibili per lint/typecheck.
 
-Puoi rinominare il package in `package.json`, sostituire copy e asset, collegare un altro motore booking o estendere le route mantenendo la stessa architettura.
+## License
+
+This project is proprietary and protected by copyright.
+Unauthorized use, reproduction, or distribution is prohibited.
