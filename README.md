@@ -19,15 +19,8 @@ Front-end demo per l’**Hotel Bijou** di **Saint-Vincent** (Valle d’Aosta): h
 
 Alias di import: `@/` → cartella `src/` (vedi `vite.config.js`).
 
-## Custom ready
 
-Pensato per essere adattato a brand e contenuti reali senza stravolgere la struttura:
+## License
 
-- **Prenotazioni** — aggiorna l’URL in `src/booking.js` (`BOOKING_URL`).
-- **Menu e rotte** — voci e path in `src/App.jsx` (`navItems` e relative `Route`).
-- **Testi e dati aggregati** — file in `src/data/` (es. recensioni / reputation) e copy nelle pagine sotto `src/pages/`.
-- **Immagini** — modulo centralizzato in `src/assets/images.js` e risorse nella cartella `src/assets/`.
-- **Look & feel** — utility Tailwind in `src/App.css` e componenti sotto `src/components/`; le animazioni rispettano `prefers-reduced-motion` dove previsto (`motionPrefs.js`, contesto splash in `SplashRevealDoneContext`).
-- **Componenti TS** — alcuni blocchi sono in `.tsx` (es. gallery); il resto del progetto resta JSX con tipi Typescript disponibili per lint/typecheck.
-
-Puoi rinominare il package in `package.json`, sostituire copy e asset, collegare un altro motore booking o estendere le route mantenendo la stessa architettura.
+This project is proprietary and protected by copyright.
+Unauthorized use, reproduction, or distribution is prohibited.
