@@ -6,7 +6,8 @@ import { bijouImages } from '../assets/images'
 import { BOOKING_URL } from '../booking'
 import { prefersReducedMotion } from '../motionPrefs'
 import { usePageSeo } from '@/hooks/usePageSeo'
-import { absoluteUrl } from '@/seo/siteSeo'
+import { HOTEL_MAP_EMBED_SRC, HOTEL_MAP_URL } from '@/siteContact'
+import { absoluteUrl, defaultSeoImage } from '@/seo/siteSeo'
 
 function ContactPage() {
   usePageSeo({
@@ -14,7 +15,7 @@ function ContactPage() {
     description:
       "Contatta Hotel Bijou a Saint-Vincent: telefono, email, mappa e modulo richieste per prenotazioni, informazioni camere, accessibilità e soggiorno.",
     pathname: '/contatti',
-    image: absoluteUrl('/images/bijou/hero-piazza-saint-vincent.png'),
+    image: defaultSeoImage,
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'ContactPage',
@@ -127,9 +128,6 @@ function ContactPage() {
     }
   }, [])
 
-  const mapSrc =
-    'https://maps.google.com/maps?q=Hotel+Bijou+Piazza+Cavalieri+di+Vittorio+Veneto+3+Saint-Vincent+Italy&t=&z=16&ie=UTF8&iwloc=&output=embed'
-
   return (
     <main className="page-shell contact-page">
       <section className="contact-hero">
@@ -167,7 +165,7 @@ function ContactPage() {
           <p>11027 Saint-Vincent (AO), Italia</p>
           <p>
             <a
-              href="https://maps.google.com/?q=Hotel+Bijou+Piazza+Cavalieri+di+Vittorio+Veneto%2C+3+Saint-vincent"
+              href={HOTEL_MAP_URL}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -191,7 +189,7 @@ function ContactPage() {
         <div className="contact-map-frame">
           <iframe
             title="Mappa Hotel Bijou Saint-Vincent"
-            src={mapSrc}
+            src={HOTEL_MAP_EMBED_SRC}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />
@@ -246,7 +244,9 @@ function ContactPage() {
               required
             />
           </label>
-          <button type="submit">Invia via e-mail</button>
+          <button type="submit" className="contact-form__submit">
+            <span className="contact-form__submit-text">Invia via e-mail</span>
+          </button>
           {formFeedback && <p className="contact-form-feedback">{formFeedback}</p>}
         </form>
       </section>

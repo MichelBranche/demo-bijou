@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { prefersReducedMotion } from '../motionPrefs'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const REWIND_DURATION_MS = 1150
 
-/** Rotella → target progress (smooth follow in RAF evita gli “scalini”) */
+/** Un solo scroll: espansione hero + scroll fino al target (es. home-story). */
+const JOURNEY_DURATION_S = 2.85
+const JOURNEY_HERO_PHASE = 0.46
+
+/** Rotella → target progress (solo reverse / tweak dopo il percorso). */
 const WHEEL_MULTIPLIER = 0.00115
 const TOUCH_GAIN_UP = 0.0082
 const TOUCH_GAIN_DOWN = 0.0049
@@ -32,25 +39,35 @@ export default function ScrollExpandHero({
   splashRevealDone = true,
   /** Istanza Lenis dalla Home (`null` finché non inizializzata) */
   lenis,
+  /** Poster e fallback statico (es. prefers-reduced-motion). */
   bgImageSrc,
+  /** Video di sfondo; se assente resta solo l’immagine. */
+  bgVideoSrc,
   mediaImageSrc,
   mediaAlt,
   title,
   subtitle,
   eyebrowLines,
   scrollHint,
+  /** Destinazione del percorso guidato (es. `home-story-grid`). */
+  handoffTargetRef,
   onUnlock,
   onCollapse,
+  onJourneyComplete,
 }) {
   const reduced = prefersReducedMotion()
   const onUnlockRef = useRef(onUnlock)
   const onCollapseRef = useRef(onCollapse)
+  const onJourneyCompleteRef = useRef(onJourneyComplete)
   useEffect(() => {
     onUnlockRef.current = onUnlock
   }, [onUnlock])
   useEffect(() => {
     onCollapseRef.current = onCollapse
   }, [onCollapse])
+  useEffect(() => {
+    onJourneyCompleteRef.current = onJourneyComplete
+  }, [onJourneyComplete])
 
   const [progress, setProgress] = useState(reduced ? 1 : 0)
   const progressRef = useRef(reduced ? 1 : 0)
@@ -67,6 +84,9 @@ export default function ScrollExpandHero({
   const fullyExpandedRef = useRef(reduced)
 
   const hasUserScrolledAwayRef = useRef(false)
+  const journeyDoneRef = useRef(reduced)
+  const journeyAnimatingRef = useRef(false)
+  const journeyTweenRef = useRef(/** @type {gsap.core.Tween | null} */ (null))
 
   /** Evita il flash dell’hint mentre la hero chiude animata */
   const [suppressScrollHint, setSuppressScrollHint] = useState(false)
@@ -76,6 +96,7 @@ export default function ScrollExpandHero({
   )
 
   const scrollExpandRootRef = useRef(/** @type {HTMLDivElement | null} */ (null))
+  const bgVideoRef = useRef(/** @type {HTMLVideoElement | null} */ (null))
   const scrollCueRootRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const typeRootRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const lineLeftRef = useRef(/** @type {HTMLSpanElement | null} */ (null))
@@ -180,6 +201,34 @@ export default function ScrollExpandHero({
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
+  useEffect(() => {
+    if (reduced || !bgVideoSrc) return undefined
+    const video = bgVideoRef.current
+    if (!video) return undefined
+
+    const tryPlay = () => {
+      if (video.ended) return
+      video.play().catch(() => {})
+    }
+
+    const onEnded = () => {
+      video.pause()
+      if (Number.isFinite(video.duration) && video.duration > 0) {
+        video.currentTime = Math.max(0, video.duration - 0.034)
+      }
+    }
+
+    tryPlay()
+    video.addEventListener('loadeddata', tryPlay)
+    video.addEventListener('ended', onEnded)
+
+    return () => {
+      video.removeEventListener('loadeddata', tryPlay)
+      video.removeEventListener('ended', onEnded)
+      video.pause()
+    }
+  }, [reduced, bgVideoSrc])
+
   const cancelSmoothing = useCallback(() => {
     if (smoothRafRef.current) {
       cancelAnimationFrame(smoothRafRef.current)
@@ -207,7 +256,7 @@ export default function ScrollExpandHero({
       setFullyExpanded(open)
     }
 
-    if (open && !unlockedRef.current && !reversingRef.current) {
+    if (open && !unlockedRef.current && !reversingRef.current && !journeyAnimatingRef.current) {
       unlockedRef.current = true
       onUnlockRef.current?.()
     }
@@ -251,14 +300,92 @@ export default function ScrollExpandHero({
     if (!smoothRafRef.current) smoothRafRef.current = requestAnimationFrame(tick)
   }, [applyProgressVisual])
 
+  const getHandoffY = useCallback(() => {
+    const el = handoffTargetRef?.current
+    if (!el) return Math.round(window.innerHeight * 0.92)
+    const nav = document.getElementById('navbar')
+    const navH = nav?.offsetHeight ?? 64
+    const rect = el.getBoundingClientRect()
+    return Math.max(0, Math.round(rect.top + window.scrollY - navH - 16))
+  }, [handoffTargetRef])
+
+  const scrollToY = useCallback(
+    (y, immediate = true) => {
+      if (lenis) {
+        lenis.scrollTo(y, { immediate })
+      } else {
+        window.scrollTo(0, y)
+      }
+    },
+    [lenis],
+  )
+
+  const startJourney = useCallback(() => {
+    if (reduced || journeyDoneRef.current || journeyAnimatingRef.current) return
+
+    journeyAnimatingRef.current = true
+    setSuppressScrollHint(true)
+    cancelSmoothing()
+    cancelRewind()
+    journeyTweenRef.current?.kill()
+
+    const targetY = getHandoffY()
+    const state = { t: 0 }
+    let scrollPhaseStarted = false
+
+    journeyTweenRef.current = gsap.to(state, {
+      t: 1,
+      duration: JOURNEY_DURATION_S,
+      ease: 'power2.inOut',
+      onUpdate: () => {
+        const t = state.t
+        const heroT = Math.min(1, t / JOURNEY_HERO_PHASE)
+        applyProgressVisual(heroT)
+
+        if (t > JOURNEY_HERO_PHASE) {
+          if (!scrollPhaseStarted) {
+            scrollPhaseStarted = true
+            unlockedRef.current = true
+            onUnlockRef.current?.()
+            lenis?.start()
+          }
+          const scrollT = (t - JOURNEY_HERO_PHASE) / (1 - JOURNEY_HERO_PHASE)
+          scrollToY(scrollT * targetY, true)
+        }
+      },
+      onComplete: () => {
+        applyProgressVisual(1)
+        scrollToY(targetY, true)
+        journeyDoneRef.current = true
+        journeyAnimatingRef.current = false
+        journeyTweenRef.current = null
+        onJourneyCompleteRef.current?.()
+        ScrollTrigger.refresh()
+      },
+    })
+  }, [
+    reduced,
+    cancelSmoothing,
+    cancelRewind,
+    getHandoffY,
+    applyProgressVisual,
+    scrollToY,
+    lenis,
+  ])
+
   const finishReverse = useCallback(() => {
     reversingRef.current = false
     cancelRewind()
+    journeyTweenRef.current?.kill()
+    journeyTweenRef.current = null
+    journeyAnimatingRef.current = false
+    journeyDoneRef.current = false
     progressTargetRef.current = 0
     applyProgressVisual(0)
     hasUserScrolledAwayRef.current = false
     setSuppressScrollHint(false)
-  }, [applyProgressVisual, cancelRewind])
+    scrollToY(0, true)
+  }, [applyProgressVisual, cancelRewind, scrollToY])
 
   const startReverse = useCallback(() => {
     if (reduced || reversingRef.current) return
@@ -335,6 +462,7 @@ export default function ScrollExpandHero({
       e.target instanceof Node && !!scrollExpandRootRef.current?.contains(e.target)
 
     const lockTopWhenClosed = () => {
+      if (journeyAnimatingRef.current || journeyDoneRef.current) return
       if (fullyExpandedRef.current) return
       if (typeof lenis !== 'undefined' && lenis) {
         if (lenis.scroll > 0.5) lenis.scrollTo(0, { immediate: true })
@@ -344,12 +472,28 @@ export default function ScrollExpandHero({
     let touchLastY = 0
     const touchStartHandler = (e) => {
       const t = e.touches[0]
-      if (!t || !touchInsideHero(t.clientX, t.clientY)) return
+      if (!t) return
       touchLastY = t.clientY
     }
 
     const wheel = (e) => {
+      if (journeyAnimatingRef.current) {
+        if (typeof e.cancelable !== 'boolean' || e.cancelable) e.preventDefault()
+        return
+      }
+
+      if (!journeyDoneRef.current) {
+        if (e.deltaY > 0) {
+          if (typeof e.cancelable !== 'boolean' || e.cancelable) e.preventDefault()
+          startJourney()
+        } else if (scrollNearTop()) {
+          if (typeof e.cancelable !== 'boolean' || e.cancelable) e.preventDefault()
+        }
+        return
+      }
+
       if (!wheelTargetInsideHero(e)) return
+
       if (reversingRef.current && rewindRafRef.current && e.deltaY > 0) {
         cancelRewind()
         reversingRef.current = false
@@ -388,11 +532,29 @@ export default function ScrollExpandHero({
       const t = e.touches[0]
       if (!t) return
       const y = t.clientY
+      const dy = touchLastY - y
+
+      if (journeyAnimatingRef.current) {
+        if (typeof e.cancelable !== 'boolean' || e.cancelable) e.preventDefault()
+        touchLastY = y
+        return
+      }
+
+      if (!journeyDoneRef.current) {
+        touchLastY = y
+        if (dy > 28) {
+          if (typeof e.cancelable !== 'boolean' || e.cancelable) e.preventDefault()
+          startJourney()
+        } else if (scrollNearTop()) {
+          if (typeof e.cancelable !== 'boolean' || e.cancelable) e.preventDefault()
+        }
+        return
+      }
+
       if (!touchInsideHero(t.clientX, t.clientY)) {
         touchLastY = y
         return
       }
-      const dy = touchLastY - y
 
       if (reversingRef.current && rewindRafRef.current && dy < -1.5) {
         cancelRewind()
@@ -440,6 +602,8 @@ export default function ScrollExpandHero({
     return () => {
       cancelSmoothing()
       cancelRewind()
+      journeyTweenRef.current?.kill()
+      journeyTweenRef.current = null
       if (smoothRafRef.current) cancelAnimationFrame(smoothRafRef.current)
       window.removeEventListener('wheel', wheel, { capture: true })
       window.removeEventListener('scroll', lockTopWhenClosed)
@@ -455,14 +619,22 @@ export default function ScrollExpandHero({
     runSmoothing,
     cancelRewind,
     cancelSmoothing,
+    startJourney,
   ])
 
   useEffect(() => {
-    if (!reduced) return
+    if (!reduced) return undefined
     fullyExpandedRef.current = true
     unlockedRef.current = true
+    journeyDoneRef.current = true
     onUnlockRef.current?.()
-  }, [reduced])
+    const id = requestAnimationFrame(() => {
+      scrollToY(getHandoffY(), true)
+      onJourneyCompleteRef.current?.()
+      ScrollTrigger.refresh()
+    })
+    return () => cancelAnimationFrame(id)
+  }, [reduced, getHandoffY, scrollToY])
 
   const pieces = title.trim().split(/\s+/)
   const firstWord = pieces[0] ?? ''
@@ -472,7 +644,10 @@ export default function ScrollExpandHero({
   const mediaHeight = isMobileState ? 400 + progress * 200 : 380 + progress * 420
 
   return (
-    <div ref={scrollExpandRootRef} className="scroll-expand-root">
+    <div
+      ref={scrollExpandRootRef}
+      className={`scroll-expand-root${fullyExpanded && isMobileState ? ' scroll-expand-root--mobile-expanded' : ''}`}
+    >
       <section className="scroll-expand-section" aria-label="Introduzione">
         <div className="scroll-expand-fill">
           <motion.div
@@ -481,13 +656,27 @@ export default function ScrollExpandHero({
             animate={{ opacity: Math.max(0, 1 - progress * 1.08) }}
             transition={SNAP_TRANSITION}
           >
-            <img
-              src={bgImageSrc}
-              alt=""
-              className="scroll-expand-bg-img"
-              decoding="async"
-              draggable={false}
-            />
+            {reduced || !bgVideoSrc ? (
+              <img
+                src={bgImageSrc}
+                alt=""
+                className="scroll-expand-bg-img"
+                decoding="async"
+                draggable={false}
+              />
+            ) : (
+              <video
+                ref={bgVideoRef}
+                className="scroll-expand-bg-video"
+                src={bgVideoSrc}
+                poster={bgImageSrc}
+                muted
+                playsInline
+                autoPlay
+                preload="auto"
+                aria-hidden
+              />
+            )}
             <div className="scroll-expand-bg-veil" aria-hidden />
           </motion.div>
 

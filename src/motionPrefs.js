@@ -1,3 +1,9 @@
+/** @returns {boolean} Viewport mobile (≤768px) */
+export function isMobileViewport() {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(max-width: 768px)').matches
+}
+
 /** @returns {boolean} User prefers minimal / no motion */
 export function prefersReducedMotion() {
   if (typeof window === 'undefined') return false

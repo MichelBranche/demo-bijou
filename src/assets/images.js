@@ -1,9 +1,13 @@
 export const bijouImages = {
   hero: '/images/bijou/hero-piazza-saint-vincent.png',
+  heroBg: '/images/bijou/hero-bg-montagne-valle-aosta.png',
+  heroBgVideo: '/videos/hero-bg.mp4',
+  ogShare: '/images/bijou/og-share.jpg',
   editorial: {
     hotel: '/images/bijou/crp945x545-arredi-1.jpg',
     rooms: '/images/bijou/crp955x600-room-index3.jpg',
-    territory: '/images/bijou/crp640x480-index-1-2.jpg',
+    territory: '/images/bijou/editorial-territorio-camoscio-valle-aosta.png',
+    territoryPiazza: '/images/bijou/editorial-territorio-piazza-saint-vincent.png',
   },
   vignettes: [
     '/images/bijou/crp640x480-index-1-1.jpg',

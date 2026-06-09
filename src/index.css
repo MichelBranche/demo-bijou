@@ -24,6 +24,11 @@
   --focus-ring-offset: 3px;
   --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
 
+  --scrollbar-size: 10px;
+  --scrollbar-track: color-mix(in srgb, var(--sand) 38%, var(--bg-color));
+  --scrollbar-thumb: color-mix(in srgb, var(--accent) 72%, #3d2a2b);
+  --scrollbar-thumb-hover: var(--accent);
+
   /* Pannello hero Camere (mockup) */
   --camere-hero-panel: #f2efe9;
 
@@ -58,6 +63,31 @@
 
 html {
   scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 2px solid var(--scrollbar-track);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track);
 }
 
 html,

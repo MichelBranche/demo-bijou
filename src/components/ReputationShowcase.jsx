@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { bijouReviewPlatforms } from '../data/bijouReputation'
 import { OfficialReviewLogo } from './OfficialReviewLogos'
-import { prefersReducedMotion } from '../motionPrefs'
+import { isMobileViewport, prefersReducedMotion } from '../motionPrefs'
 
 function formatRating(n) {
   return n.toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
@@ -25,6 +25,11 @@ export default function ReputationShowcase({ revealed = true }) {
     const ctx = gsap.context(() => {
       const items = gsap.utils.toArray(section.querySelectorAll('.reputation-strip-reveal'))
       if (!items.length) return
+
+      if (isMobileViewport()) {
+        gsap.set(items, { y: 0, opacity: 1, clearProps: 'all' })
+        return
+      }
 
       gsap.set(items, { y: 20, opacity: 0, willChange: 'transform,opacity' })
       gsap.fromTo(

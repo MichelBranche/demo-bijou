@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { absoluteUrl, defaultSeoImage } from '@/seo/siteSeo'
+import { absoluteUrl, defaultSeoImage, defaultSeoImageMeta } from '@/seo/siteSeo'
 
 function ensureMeta(attr, key) {
   const selector = `meta[${attr}="${key}"]`
@@ -28,6 +28,9 @@ function ensureLink(rel) {
  * description: string
  * pathname: string
  * image?: string
+ * imageWidth?: number
+ * imageHeight?: number
+ * imageAlt?: string
  * type?: 'website' | 'article'
  * jsonLd?: Record<string, unknown> | Record<string, unknown>[]
  * noindex?: boolean
@@ -40,6 +43,9 @@ export function usePageSeo(input) {
       description,
       pathname,
       image = defaultSeoImage,
+      imageWidth = defaultSeoImageMeta.width,
+      imageHeight = defaultSeoImageMeta.height,
+      imageAlt = defaultSeoImageMeta.alt,
       type = 'website',
       jsonLd,
       noindex = false,
@@ -59,6 +65,9 @@ export function usePageSeo(input) {
     ensureMeta('property', 'og:description').setAttribute('content', description)
     ensureMeta('property', 'og:url').setAttribute('content', canonical)
     ensureMeta('property', 'og:image').setAttribute('content', image)
+    ensureMeta('property', 'og:image:width').setAttribute('content', String(imageWidth))
+    ensureMeta('property', 'og:image:height').setAttribute('content', String(imageHeight))
+    ensureMeta('property', 'og:image:alt').setAttribute('content', imageAlt)
 
     ensureMeta('name', 'twitter:card').setAttribute('content', 'summary_large_image')
     ensureMeta('name', 'twitter:title').setAttribute('content', title)

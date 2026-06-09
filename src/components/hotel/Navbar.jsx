@@ -85,7 +85,7 @@ export default function Navbar({ menuOpen, setMenuOpen, isNarrowViewport }) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Prenota
+              <span className="nav-cta__text">Prenota</span>
             </a>
             <button
               type="button"

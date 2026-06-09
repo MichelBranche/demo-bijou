@@ -11,5 +11,12 @@ export function absoluteUrl(path = '/') {
   return `${SITE_URL}${safePath}`
 }
 
-export const defaultSeoImage = absoluteUrl('/images/bijou/hero-piazza-saint-vincent.png')
+export const defaultSeoImage = absoluteUrl('/images/bijou/og-share.jpg')
+
+/** Dimensioni immagine social (Open Graph / Twitter). */
+export const defaultSeoImageMeta = {
+  width: 1200,
+  height: 630,
+  alt: 'Hotel Bijou — boutique hotel in piazza a Saint-Vincent, Valle d\'Aosta',
+}
 

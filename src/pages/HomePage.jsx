@@ -7,9 +7,9 @@ import ScrollExpandHero from '../components/ScrollExpandHero'
 import { SplashRevealDoneContext } from '../context/SplashRevealDoneContext'
 import ReputationShowcase from '../components/ReputationShowcase'
 import { bijouImages } from '../assets/images'
-import { prefersReducedMotion } from '../motionPrefs'
+import { isMobileViewport, prefersReducedMotion } from '../motionPrefs'
 import { usePageSeo } from '@/hooks/usePageSeo'
-import { absoluteUrl } from '@/seo/siteSeo'
+import { absoluteUrl, defaultSeoImage } from '@/seo/siteSeo'
 
 const editorialSlides = [
   {
@@ -43,7 +43,7 @@ const editorialSlides = [
     cta: 'Territorio e dintorni',
     to: '/territorio',
     image: bijouImages.editorial.territory,
-    alt: 'Scorcio ispirato al soggiorno in valle',
+    alt: 'Camoscio sulle rocce in Valle d’Aosta, con bosco alpino sullo sfondo',
   },
 ]
 
@@ -56,7 +56,7 @@ function HomePage() {
     description:
       "Hotel Bijou a Saint-Vincent, Valle d'Aosta: boutique hotel in piazza con camere curate, colazione locale e accesso comodo a terme, sport e territorio.",
     pathname: '/',
-    image: absoluteUrl('/images/bijou/hero-piazza-saint-vincent.png'),
+    image: defaultSeoImage,
     jsonLd: [
       {
         '@context': 'https://schema.org',
@@ -103,7 +103,14 @@ function HomePage() {
     if (!routeReducedMotion) setReputationRevealed(false)
   }, [routeReducedMotion])
 
-  const handleHeroUnlock = useCallback(() => setScrollUnlocked(true), [])
+  const handleHeroUnlock = useCallback(() => {
+    setScrollUnlocked(true)
+  }, [])
+
+  const handleJourneyComplete = useCallback(() => {
+    setScrollUnlocked(true)
+    setReputationRevealed(true)
+  }, [])
 
   useEffect(() => {
     const nav = document.getElementById('navbar')
@@ -178,6 +185,10 @@ function HomePage() {
   useEffect(() => {
     if (routeReducedMotion) return undefined
     if (!scrollUnlocked) return undefined
+    if (isMobileViewport()) {
+      setReputationRevealed(true)
+      return undefined
+    }
 
     const readScrollY = () => {
       if (homeLenis && typeof homeLenis.scroll === 'number') return homeLenis.scroll
@@ -230,42 +241,55 @@ function HomePage() {
       if (homeStorySection && homeStoryGridEl) {
         const storyReveals = gsap.utils.toArray(homeStorySection.querySelectorAll('.home-story-reveal'))
 
-        const tl = gsap.timeline({
-          defaults: { ease: 'power3.out' },
-          scrollTrigger: {
-            trigger: homeStorySection,
-            start: 'top 82%',
-          },
-        })
-
-        tl.fromTo(
-          homeStoryGridEl,
-          { opacity: 0, y: 40, scale: 0.985, filter: 'blur(12px)' },
-          {
+        if (!isDesktop) {
+          gsap.set(homeStoryGridEl, {
             opacity: 1,
             y: 0,
             scale: 1,
-            filter: 'blur(0px)',
-            duration: 0.88,
-            onComplete() {
-              gsap.set(homeStoryGridEl, { clearProps: 'filter' })
+            filter: 'none',
+            clearProps: 'all',
+          })
+          if (storyReveals.length) {
+            gsap.set(storyReveals, { y: 0, opacity: 1, clearProps: 'all' })
+          }
+        } else {
+          const tl = gsap.timeline({
+            defaults: { ease: 'power3.out' },
+            scrollTrigger: {
+              trigger: homeStorySection,
+              start: 'top 82%',
             },
-          },
-        )
+          })
 
-        if (storyReveals.length) {
-          gsap.set(storyReveals, { y: 28, opacity: 0 })
-          tl.to(
-            storyReveals,
+          tl.fromTo(
+            homeStoryGridEl,
+            { opacity: 0, y: 40, scale: 0.985, filter: 'blur(12px)' },
             {
-              y: 0,
               opacity: 1,
-              duration: 0.8,
-              stagger: 0.11,
-              onComplete: () => gsap.set(storyReveals, { clearProps: 'willChange' }),
+              y: 0,
+              scale: 1,
+              filter: 'blur(0px)',
+              duration: 0.88,
+              onComplete() {
+                gsap.set(homeStoryGridEl, { clearProps: 'filter' })
+              },
             },
-            '-=0.62',
           )
+
+          if (storyReveals.length) {
+            gsap.set(storyReveals, { y: 28, opacity: 0 })
+            tl.to(
+              storyReveals,
+              {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                stagger: 0.11,
+                onComplete: () => gsap.set(storyReveals, { clearProps: 'willChange' }),
+              },
+              '-=0.62',
+            )
+          }
         }
       }
 
@@ -380,7 +404,8 @@ function HomePage() {
       <ScrollExpandHero
         splashRevealDone={splashRevealDone}
         lenis={routeReducedMotion ? null : homeLenis}
-        bgImageSrc={bijouImages.editorial.hotel}
+        bgImageSrc={bijouImages.heroBg}
+        bgVideoSrc={bijouImages.heroBgVideo}
         mediaImageSrc={bijouImages.hero}
         mediaAlt={heroAlt}
         title="Hotel Bijou"
@@ -395,11 +420,11 @@ function HomePage() {
         }
         eyebrowLines={['Boutique hotel', 'Piazza centrale']}
         scrollHint="Scorri per entrare in hotel"
+        handoffTargetRef={homeStoryGridRef}
         onUnlock={handleHeroUnlock}
         onCollapse={handleHeroCollapse}
+        onJourneyComplete={handleJourneyComplete}
       />
-
-      <ReputationShowcase revealed={reputationRevealed} />
 
       <section className="home-story" aria-labelledby="home-story-heading">
         <div ref={homeStoryGridRef} className="home-story-grid">
@@ -419,8 +444,19 @@ function HomePage() {
             Il nostro lavoro quotidiano è farvi trovare biancheria fresca, tessuti sobri, dettaglio curato e
             un&apos;accoglienza domestica che resta difficile da replicare quando partite.
           </p>
+          <figure className="home-story-figure home-story-reveal">
+            <img
+              className="home-story-photo"
+              src={bijouImages.editorial.territoryPiazza}
+              alt="Piazza centrale di Saint-Vincent vista attraverso un arco in pietra, con palazzi e montagne sullo sfondo"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
         </div>
       </section>
+
+      <ReputationShowcase revealed={reputationRevealed} />
 
       <section className="horizontal-section" ref={horizontalSectionRef}>
         <div
